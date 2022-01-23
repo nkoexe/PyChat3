@@ -1,9 +1,16 @@
 # PyChat v3
 
-desc
+description
+
+---
+
+## Todo:
+
+- close event (send signal to server, write config.ini)
 
 ---
 
 ## Requirements
+
 - PySide6
 - Requests

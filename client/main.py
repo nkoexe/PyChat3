@@ -1,4 +1,5 @@
 from base64 import b64encode, b64decode
+from configparser import ConfigParser
 from hashlib import sha256
 from json import loads
 from os.path import exists, dirname, join
@@ -115,19 +116,18 @@ class ConnectionBackend:
         if code != 0:
             return window.exitCode.emit(code)
 
-        self.VERSION, self.MY_ID, MY_HASH = open('data', 'r').read().split('×')
+        self.VERSION = CONFIG.get('data', 'version')
+        self.MY_ID, MY_HASH = CONFIG.get('data', 'login').split('g')
 
         if self.VERSION != self.serverVersion:
             self.sock.send(b'}}}{')
 
         else:
             self.sock.send(ntoa(int(self.MY_ID)).encode())
-            if self.sock.recv(BUF) != b'k':
-                return print('user not in list')  # go to login
-
             self.send(MY_HASH)
-            if self.sock.recv(BUF) != b'k':
-                return print('Password hash not valid')  # go to login
+
+            if self.sock.recv(1) != b'k':
+                return print('login invalid')  # go to login
 
             window.exitCode.emit(0)
             window.openMain.emit()
@@ -146,8 +146,10 @@ class ConnectionBackend:
             self.sock = socket()
             return 1
         else:
-            open('data', 'w').write(
-                self.serverVersion+'×'+self.MY_ID+'×'+password)
+            CONFIG.set('data', 'version', self.serverVersion)
+            CONFIG.set('data', 'login', self.MY_ID+'g'+password)
+            # Todo: remove, add to close event
+            CONFIG.write(open('config.ini', 'w'))
             window.root.deleteLater()
             window.openMain.emit()
             self.mainReciever()
@@ -161,7 +163,10 @@ if __name__ == '__main__':
     connection = ConnectionBackend()
 
     chdir(dirname(__file__))
-    if exists('data'):
+    CONFIG = ConfigParser()
+    CONFIG.read('config.ini')
+
+    if CONFIG.get('data', 'login'):
         Thread(target=connection.standardConnect, daemon=True).start()
     else:
         window.openLogin.emit()

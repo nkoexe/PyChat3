@@ -107,11 +107,10 @@ if __name__ == '__main__':
             print('registering')
 
         elif client_id not in USERS:
+            recieve(client)
             client.send(b'n')
 
         else:
-            client.send(b'k')
-
             if USERS[client_id]['hash'] == recieve(client):
                 client.send(b'k')
                 Thread(target=handle_client, args=(

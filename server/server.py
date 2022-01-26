@@ -99,12 +99,27 @@ if __name__ == '__main__':
                     send(client, u)
                     Thread(target=handle_client, args=(
                         client, u), daemon=True).start()
-                else:
-                    send(client, 'nope')
-                    client.close()
+                    continue
+
+            send(client, 'nope')
+            client.close()
 
         elif client_id == '74805195':
-            print('registering')
+            username = recieve(client)
+            taken = False
+            for u in USERS:
+                if USERS[u]['name'] == username:
+                    taken = True
+                    break
+
+            if taken:
+                client.send(b'n')
+                continue
+
+            client.send(b'k')
+            imgdata, passw, col1, col2 = recieve(client).split('×')
+            print(imgdata, passw, col1, col2)
+            send(client, '2')
 
         elif client_id not in USERS:
             recieve(client)

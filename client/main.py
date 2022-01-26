@@ -5,6 +5,7 @@ from json import loads
 from os.path import exists, dirname, join
 from os import chdir, fspath
 from pathlib import Path
+import pwd
 from requests import get, exceptions
 from socket import socket, timeout
 from threading import Thread
@@ -35,6 +36,7 @@ class WindowBackend(QObject):
     openMain = Signal()
     openLoading = Signal()
     openLogin = Signal()
+    openSignup = Signal()
 
     setStatus = Signal(str)
     exitCode = Signal(int)
@@ -49,16 +51,17 @@ class WindowBackend(QObject):
         self.openMain.connect(self._openMain)
         self.openLoading.connect(self._openLoading)
         self.openLogin.connect(self._openLogin)
+        self.openSignup.connect(self._openSignup)
 
     def _openMain(self):
         self.engine.load(
             join(dirname(__file__), 'qml', 'main.qml'))
-        self.root = self.engine.rootObjects()[1]
+        self.root = self.engine.rootObjects()[-1]
 
     def _openLoading(self):
         self.engine.load(
             join(dirname(__file__), 'qml', 'loading.qml'))
-        self.root = self.engine.rootObjects()[0]
+        self.root = self.engine.rootObjects()[-1]
 
         self.setStatus.connect(self.root.setLabel)
         self.exitCode.connect(self.root.exitCode)
@@ -66,7 +69,12 @@ class WindowBackend(QObject):
     def _openLogin(self):
         self.engine.load(
             join(dirname(__file__), 'qml', 'login.qml'))
-        self.root = self.engine.rootObjects()[0]
+        self.root = self.engine.rootObjects()[-1]
+
+    def _openSignup(self):
+        self.engine.load(
+            join(dirname(__file__), 'qml', 'signup.qml'))
+        self.root = self.engine.rootObjects()[-1]
 
     def exec(self):
         self.app.exec()
@@ -74,6 +82,10 @@ class WindowBackend(QObject):
     @Slot(str, str, result=int)
     def submitLogin(self, username, password):
         return connection.submitLogin(username, sha256(password.encode()).hexdigest())
+
+    @Slot(str, str, str, str, str, result=int)
+    def submitSignup(self, imgpath, username, password, col1, col2):
+        return connection.submitSignup(imgpath, username, sha256(password.encode()).hexdigest(), col1, col2)
 
 
 class ConnectionBackend:
@@ -144,15 +156,42 @@ class ConnectionBackend:
         if self.MY_ID == 'nope':
             self.sock.close()
             self.sock = socket()
-            return 1
+            return -1
         else:
             CONFIG.set('data', 'version', self.serverVersion)
             CONFIG.set('data', 'login', self.MY_ID+'g'+password)
             # Todo: remove, add to close event
             CONFIG.write(open('config.ini', 'w'))
+
             window.root.deleteLater()
             window.openMain.emit()
             self.mainReciever()
+
+    def submitSignup(self, imgpath, username, password, col1, col2):
+        code = self.connectServer()
+        if code != 0:
+            return code
+        self.sock.send(b'}}}x')
+
+        self.send(username)
+        if self.sock.recv(1) == b'n':
+            self.sock.close()
+            self.sock = socket()
+            return -1
+
+        print(pwd(), imgpath)
+        self.send(open(imgpath, 'r').read() + '×' +
+                  password + '×' + col1 + '×' + col2)
+        self.MY_ID = self.recieve()
+
+        CONFIG.set('data', 'version', self.serverVersion)
+        CONFIG.set('data', 'login', self.MY_ID+'g'+password)
+        # Todo: remove, add to close event
+        CONFIG.write(open('config.ini', 'w'))
+
+        window.root.deleteLater()
+        window.openMain.emit()
+        self.mainReciever()
 
     def mainReciever(self):
         self.USERS = loads(self.recieve())

@@ -1,4 +1,6 @@
 from os.path import dirname, join
+from socket import socket
+from traceback import print_tb
 
 
 def update(index=-1):
@@ -48,4 +50,12 @@ else:
 
 
 open(filepath, 'w').write(newversion)
-# send new version to server
+
+s = socket(2, 1)
+try:
+    s.connect(('localhost', 24839))
+    s.send(b'}}}}')
+    s.send(newversion.encode())
+    print('Successo.')
+except:
+    print('\nErrore nella connessione al server.')

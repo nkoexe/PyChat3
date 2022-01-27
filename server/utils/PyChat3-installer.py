@@ -3,7 +3,7 @@ from socket import socket, timeout
 from time import sleep
 from requests import get, exceptions
 from threading import Thread
-from os import mkdir, chdir, remove
+from os import mkdir, chdir, remove, system
 from base64 import b64decode
 from PySide6.QtCore import Signal, Slot, QObject
 from PySide6.QtQml import QQmlApplicationEngine
@@ -242,12 +242,13 @@ def connect():
         mkdir(PATH)
     chdir(PATH)
 
-    sleep(1.2)
+    sleep(.5)
     open('qml.zip', 'wb').write(recieve())
     open('main.py', 'wb').write(recieve())
+    open('config.ini', 'wb').write(recieve())
 
     window.setLabel.emit('Estraendo i dati ...')
-    sleep(.6)
+    sleep(.3)
     unpack_archive('qml.zip', 'qml', 'zip')
     remove('qml.zip')
 
@@ -271,6 +272,7 @@ Type=Application''')
         call(['chmod', '+x', join(expanduser('~'), 'Desktop', 'PyChat.desktop')])
 
     window.setLabel.emit('Fatto')
+    print('syscall installer:', system('py main.py'))
 
 
 PATH = join(expanduser('~'), '.PyChat3')

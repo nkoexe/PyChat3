@@ -13,7 +13,7 @@ Window {
 
 
     Material.theme: Material.Dark
-    Material.accent: "#d61c6f"
+    Material.accent: colors.highlight
 
 
     function setLabel (s) {
@@ -57,7 +57,7 @@ Window {
 
         Rectangle {
             id: root
-            color: "#222"
+            color: colors.bg2
             border.width: 0
             radius: 5
             anchors.fill: parent
@@ -85,7 +85,7 @@ Window {
                         height: parent.height + 5
                         radius: 5
                         border.width: 0
-                        color: closebutton.pressed ? "#d80073" : (closebutton.hovered ? "#09ffffff" : "transparent")
+                        color: closebutton.pressed ? colors.highlight : (closebutton.hovered ? "#09ffffff" : "transparent")
                     }
                 }
 
@@ -96,7 +96,7 @@ Window {
 
             Text {
                 id: title
-                color: '#eee'
+                color: colors.text1
                 text: "PyChat v0.0"
                 anchors.top: parent.top
                 verticalAlignment: Text.AlignVCenter
@@ -104,20 +104,20 @@ Window {
                 anchors.topMargin: win.height/3
                 anchors.horizontalCenter: parent.horizontalCenter
                 horizontalAlignment: Text.AlignHCenter
-                font.family: 'Product Sans'
+                font.family: settings.font
                 font.pixelSize: 30
             }
 
             Text {
                 id: subtitle
-                color: '#eee'
+                color: colors.text1
                 text: "Connessione al server ..."
                 anchors.top: title.bottom
                 verticalAlignment: Text.AlignVCenter
                 anchors.topMargin: win.height/10
                 horizontalAlignment: Text.AlignHCenter
                 anchors.horizontalCenter: parent.horizontalCenter
-                font.family: 'Product Sans'
+                font.family: settings.font
                 font.pixelSize: 15
             }
 

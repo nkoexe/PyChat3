@@ -25,24 +25,6 @@ Window {
     flags: Qt.FramelessWindowHint | Qt.Window
 
 
-    Item {
-        id: config
-        property string fontfamily: "Product Sans"
-        property color iconcolor: "#eeeeee"
-        property color textcolor: "#eeeeee"
-        property color basecolor: "#212121"
-        property color highlight: "#44c7c3"
-
-
-        property double shift1: -.05
-        property double shift2: -.01
-        property double shift3: +.02
-        property color bg1: Qt.rgba(basecolor.r+shift1, basecolor.g+shift1, basecolor.b+shift1, 255)   // titlebar, statusbar
-        property color bg2: Qt.rgba(basecolor.r+shift2, basecolor.g+shift2, basecolor.b+shift2, 255)   //
-        property color bg3: Qt.rgba(basecolor.r+shift3, basecolor.g+shift3, basecolor.b+shift3, 255)   //
-    }
-
-
     function setTitle (s) {
         win.title = s
         title.text = s
@@ -55,14 +37,14 @@ Window {
 
     Rectangle {
         id: root
-        color: config.basecolor
+        color: colors.bg1
         border.width: 0
         anchors.fill: parent
 
         Rectangle {
             id: titlebar
             height: 25
-            color: config.bg1
+            color: colors.titlebar
             border.width: 0
             anchors.top: parent.top
             anchors.left: parent.left
@@ -70,10 +52,10 @@ Window {
 
             CustomButton {
                 id: titlebarlogo
-                color: parent.color
+                color: colors.titlebar
                 icon: "appicon.png"
-                iconcolor: config.iconcolor
-                clickcolor: config.highlight
+                iconcolor: colors.icons
+                clickcolor: colors.highlight
                 iconmargin: 6
                 width: height
                 anchors.top: parent.top
@@ -85,9 +67,9 @@ Window {
 
             CustomButton {
                 id: closebutton
-                color: parent.color
+                color: colors.titlebar
                 icon: "close.png"
-                iconcolor: config.iconcolor
+                iconcolor: colors.icons
                 clickcolor: "#eb4034"
                 width: height
                 anchors.top: parent.top
@@ -101,9 +83,9 @@ Window {
 
             CustomButton {
                 id: maximizebutton
-                color: parent.color
+                color: colors.titlebar
                 icon: "square.png"
-                iconcolor: config.iconcolor
+                iconcolor: colors.icons
                 clickcolor: "#43bf30"
                 width: height
                 anchors.top: parent.top
@@ -120,9 +102,9 @@ Window {
 
             CustomButton {
                 id: hidebutton
-                color: parent.color
+                color: colors.titlebar
                 icon: "hide.png"
-                iconcolor: config.iconcolor
+                iconcolor: colors.icons
                 clickcolor: "#e6ad3c"
                 width: height
                 anchors.top: parent.top
@@ -136,13 +118,13 @@ Window {
 
             Text {
                 id: title
-                color: config.textcolor
+                color: colors.text1
                 text: "PyChat v0.0"
                 verticalAlignment: Text.AlignVCenter
                 horizontalAlignment: Text.AlignHCenter
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.horizontalCenter: parent.horizontalCenter
-                font.family: config.fontfamily
+                font.family: settings.font
                 font.pixelSize: 12
             }
 
@@ -182,7 +164,7 @@ Window {
         Rectangle {
             id: statusbar
             height: 20
-            color: config.bg1
+            color: colors.titlebar
             border.width: 0
             anchors.left: parent.left
             anchors.right: parent.right
@@ -190,19 +172,19 @@ Window {
 
             Text {
                 id: status
-                color: config.textcolor
+                color: colors.text1
                 text: "Connesso"
                 anchors.left: parent.left
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
-                font.family: config.fontfamily
+                font.family: settings.font
                 font.pixelSize: 12
             }
         }
 
         Rectangle {
             id: chatbar
-            color: config.basecolor
+            color: colors.bg1
             border.width: 0
             anchors.top: titlebar.bottom
             anchors.bottom: statusbar.top
@@ -212,9 +194,13 @@ Window {
             Rectangle {
                 id: currentuserbar
                 height: 50
-                color: config.bg3
+                color: colors.bg2
                 border.width: 0
+                radius: settings.radius
                 anchors.top: parent.top
+                anchors.rightMargin: settings.margins
+                anchors.leftMargin: settings.margins
+                anchors.topMargin: settings.margins
                 anchors.left: parent.left
                 anchors.right: parent.right
             }
@@ -222,9 +208,13 @@ Window {
             Rectangle {
                 id: entrybar
                 height: 60
-                color: config.bg2
+                color: colors.bg2
                 border.width: 0
+                radius: settings.radius
                 anchors.bottom: parent.bottom
+                anchors.rightMargin: settings.margins
+                anchors.leftMargin: settings.margins
+                anchors.bottomMargin: settings.margins
                 anchors.left: parent.left
                 anchors.right: parent.right
 
@@ -232,8 +222,8 @@ Window {
                     id: sendbutton
                     color: parent.color
                     icon: 'send.png'
-                    iconcolor: config.iconcolor
-                    clickcolor: config.highlight
+                    iconcolor: colors.icons
+                    clickcolor: colors.highlight
                     iconmargin: 12
                     height: parent.height
                     width: height
@@ -248,7 +238,7 @@ Window {
 
                 Rectangle {
                     height: parent.height/1.5
-                    color: config.basecolor
+                    color: colors.bg1
                     radius: height/2
                     anchors.left: parent.left
                     anchors.right: sendbutton.left
@@ -259,14 +249,14 @@ Window {
                     TextInput {
                         id: entry
                         focus: true
-                        color: config.textcolor
-                        selectionColor: "#fbb790"
-                        selectedTextColor: config.textcolor
+                        color: colors.text1
+                        selectionColor: colors.highlight
+                        selectedTextColor: colors.text1
                         verticalAlignment: Text.AlignVCenter
                         anchors.fill: parent
                         anchors.margins: 5
                         anchors.leftMargin: 20
-                        font.family: config.fontfamily
+                        font.family: settings.font
                         font.pointSize: 16
                     }
                 }
@@ -284,17 +274,22 @@ Window {
         Rectangle {
             id: usersbar
             width: 237
-            color: config.bg2
+            color: colors.bg2
             border.width: 0
+            radius: settings.radius
             anchors.bottom: statusbar.top
+            anchors.leftMargin: settings.margins
+            anchors.bottomMargin: settings.margins
+            anchors.topMargin: settings.margins
             anchors.left: parent.left
             anchors.top: titlebar.bottom
 
             Rectangle {
                 id: myuserbar
-                height: 50
-                color: config.basecolor
+                height: currentuserbar.height
+                color: colors.bg3
                 border.width: 0
+                radius: settings.radius
                 anchors.top: parent.top
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -302,3 +297,10 @@ Window {
         }
     }
 }
+
+/*##^##
+Designer {
+    D{i:0;formeditorZoom:1.25}D{i:1}D{i:4}D{i:5}D{i:6}D{i:7}D{i:8}D{i:9}D{i:3}D{i:11}
+D{i:10}D{i:13}D{i:15}D{i:17}D{i:16}D{i:14}D{i:18}D{i:12}D{i:20}D{i:19}D{i:2}
+}
+##^##*/

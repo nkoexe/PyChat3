@@ -16,12 +16,12 @@ Window {
 
 
     Material.theme: Material.Dark
-    Material.accent: "#d61c6f"
+    Material.accent: colors.highlight
 
 
     Rectangle {
         id: root
-        color: '#222'
+        color: colors.bg2
         border.width: 0
         radius: 5
         anchors.fill: parent
@@ -51,14 +51,14 @@ Window {
 
             Text {
                 id: title
-                color: '#eee'
+                color: colors.text1
                 text: "PyChat - Signup"
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.leftMargin: 25
                 anchors.topMargin: 18
                 font.bold: true
-                font.family: 'Product Sans'
+                font.family: settings.font
                 font.pixelSize: 24
             }
 
@@ -107,7 +107,7 @@ Window {
 
             ColorOverlay {
                 source: image
-                color: "#eee"
+                color: colors.icons
                 antialiasing: true
                 anchors.fill: image
             }

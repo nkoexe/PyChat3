@@ -16,9 +16,11 @@ def send(cli, msg):
     cli.send(m)
 
 
-def recieve(cli):
-    size = aton(cli.recv(4).decode())
-    return b64decode(cli.recv(size)).decode()
+def recieve(cli, bytes=False):
+    msg = b64decode(cli.recv(aton(cli.recv(4).decode())))
+    if not bytes:
+        msg = msg.decode()
+    return msg
 
 
 # encoding num to 4 lett ascii - max 74805200
@@ -36,6 +38,26 @@ def aton(a):
     c1, c2, c3, c4 = [i-33 for i in map(ord, list(a))]
 
     return c1*93**3 + c2*93**2 + c3*93 + c4
+
+
+def newuser(imgdata, username, passw, col1, col2):
+    userid = 1
+    for u in USERS:
+        if int(u) != userid:
+            break
+        userid += 1
+        
+    userid = str(userid)
+
+    open(f'images/{userid}.png', 'wb').write(imgdata)
+    USERS[userid] = {'name': username,
+                          'hash': passw,
+                          'col1': col1,
+                          'col2': col2,
+                          'customstatus': ''}
+    dump(USERS, open('users.json', 'w'), indent=2, sort_keys=True)
+
+    return userid
 
 
 def handle_client(cli, cli_id):
@@ -77,19 +99,25 @@ if __name__ == '__main__':
 
         if client_id == '74805200':
             VERSION = client.recv(BUF).decode()
+            print(VERSION)
             # send notification to active users
 
         elif client_id == '74805199':
             print('servercmd')
 
+        # todo: mandare manualmente i file (senza main.pyproj)
         elif client_id == '74805198':
-            make_archive('../qml', 'zip', '../qml')
-            send(client, open('../qml.zip', 'rb').read())
-            remove('../qml.zip')
-            send(client, open('../main.py', 'rb').read())
+            make_archive('../client/qml', 'zip', '../client/qml')
+            send(client, open('../client/qml.zip', 'rb').read())
+            remove('../client/qml.zip')
+            send(client, open('../client/main.py', 'rb').read())
+            send(client, open('../client/config.ini', 'rb').read())
 
         elif client_id == '74805197':
-            print('update')
+            make_archive('../client/qml', 'zip', '../client/qml')
+            send(client, open('../client/qml.zip', 'rb').read())
+            remove('../client/qml.zip')
+            send(client, open('../client/main.py', 'rb').read())
 
         elif client_id == '74805196':
             usr, passw = recieve(client).split('×')
@@ -117,9 +145,11 @@ if __name__ == '__main__':
                 continue
 
             client.send(b'k')
-            imgdata, passw, col1, col2 = recieve(client).split('×')
-            print(imgdata, passw, col1, col2)
-            send(client, '2')
+            client_id = newuser(recieve(client, bytes=True),
+                                username, *recieve(client).split('×'))
+            send(client, client_id)
+            Thread(target=handle_client, args=(
+                client, client_id), daemon=True).start()
 
         elif client_id not in USERS:
             recieve(client)

@@ -14,12 +14,12 @@ Window {
 
 
     Material.theme: Material.Dark
-    Material.accent: "#d61c6f"
+    Material.accent: colors.highlight
 
 
     Rectangle {
         id: root
-        color: '#222'
+        color: colors.bg2
         border.width: 0
         radius: 5
         anchors.fill: parent
@@ -49,14 +49,14 @@ Window {
 
             Text {
                 id: title
-                color: '#eee'
+                color: colors.text1
                 text: "PyChat - Login"
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.leftMargin: 25
                 anchors.topMargin: 18
                 font.bold: true
-                font.family: 'Product Sans'
+                font.family: settings.font
                 font.pixelSize: 24
             }
 
@@ -83,7 +83,7 @@ Window {
                         height: parent.height + 5
                         radius: 5
                         border.width: 0
-                        color: closebutton.pressed ? "#d80073" : (closebutton.hovered ? "#09ffffff" : "transparent")
+                        color: closebutton.pressed ? colors.highlight : (closebutton.hovered ? "#09ffffff" : "transparent")
                     }
                 }
 
@@ -138,12 +138,12 @@ Window {
         Text {
             id: nonhaiacc
             text: "Non hai un account?"
-            color: "#eee"
+            color: colors.text1
             anchors.top: login.bottom
             anchors.horizontalCenterOffset: -40
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.topMargin: 35
-            font.family: 'Product Sans'
+            font.family: settings.font
             font.pixelSize: 12
         }
 

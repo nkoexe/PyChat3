@@ -7,6 +7,7 @@ description
 ## Todo:
 
 - close event (send signal to server, write config.ini)
+- Update system (reading .zip encoding error, send list of files instead)
 
 ---
 

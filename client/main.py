@@ -3,14 +3,13 @@ from configparser import ConfigParser
 from hashlib import sha256
 from json import loads
 from os.path import exists, dirname, join
-from os import chdir, fspath
+from os import chdir, fspath, name as osname
 from pathlib import Path
-import pwd
 from requests import get, exceptions
 from socket import socket, timeout
 from threading import Thread
 
-from PySide6.QtGui import QGuiApplication
+from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import Signal, Slot, QObject
 
@@ -46,12 +45,25 @@ class WindowBackend(QObject):
 
         self.app = QGuiApplication()
         self.engine = QQmlApplicationEngine()
+
+        self.app.setWindowIcon(QIcon(join('qml', 'images', 'appicon.png')))
+        if osname == 'nt':
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
+                u'nicoinc.pychat.3')
+
         self.engine.rootContext().setContextProperty('backend', self)
 
         self.openMain.connect(self._openMain)
         self.openLoading.connect(self._openLoading)
         self.openLogin.connect(self._openLogin)
         self.openSignup.connect(self._openSignup)
+
+    def loadSettings(self, theme=None, settings=None):
+        if theme:
+            self.engine.rootContext().setContextProperty('colors', theme)
+        if settings:
+            self.engine.rootContext().setContextProperty('settings', settings)
 
     def _openMain(self):
         self.engine.load(
@@ -93,15 +105,18 @@ class ConnectionBackend:
         self.sock = socket(2, 1)
         self.connected = False
 
-    def send(self, msg: str):
-        m = b64encode(msg.encode())
-        m = f'{ntoa(len(m))}'.encode() + m
-        self.sock.send(m)
+    def send(self, msg):
+        if isinstance(msg, str):
+            msg = msg.encode()
+        msg = b64encode(msg)
+        msg = f'{ntoa(len(msg))}'.encode() + msg
+        self.sock.send(msg)
 
-    def recieve(self):
-        size = aton(self.sock.recv(4).decode())
-        p = self.sock.recv(size)
-        return b64decode(p).decode()
+    def recieve(self, bytes=False):
+        msg = b64decode(self.sock.recv(aton(self.sock.recv(4).decode())))
+        if not bytes:
+            msg = msg.decode()
+        return msg
 
     def connectServer(self):
         self.sock.settimeout(4)
@@ -131,8 +146,20 @@ class ConnectionBackend:
         self.VERSION = CONFIG.get('data', 'version')
         self.MY_ID, MY_HASH = CONFIG.get('data', 'login').split('g')
 
+        # UPDATE
         if self.VERSION != self.serverVersion:
-            self.sock.send(b'}}}{')
+            self.sock.send(b'}}}z')
+            window.setStatus.emit('Aggiornando il Software ...')
+            open('qml.zip', 'wb').write(self.recieve(bytes=True))
+            open('main.py', 'wb').write(self.recieve(bytes=True))
+
+            window.setStatus.emit('Estraendo i dati ...')
+
+            from shutil import unpack_archive
+            from os import remove, system
+            unpack_archive('qml.zip', 'qml', 'zip')
+            remove('qml.zip')
+            print('update: ', system('py main.py'))
 
         else:
             self.sock.send(ntoa(int(self.MY_ID)).encode())
@@ -179,14 +206,13 @@ class ConnectionBackend:
             self.sock = socket()
             return -1
 
-        print(pwd(), imgpath)
-        self.send(open(imgpath, 'r').read() + '×' +
-                  password + '×' + col1 + '×' + col2)
+        self.send(open(join('qml', imgpath), 'rb').read())
+        self.send(password + '×' + col1 + '×' + col2)
         self.MY_ID = self.recieve()
 
         CONFIG.set('data', 'version', self.serverVersion)
         CONFIG.set('data', 'login', self.MY_ID+'g'+password)
-        # Todo: remove, add to close event
+        # Todo: don't write now, add to close event
         CONFIG.write(open('config.ini', 'w'))
 
         window.root.deleteLater()
@@ -197,13 +223,22 @@ class ConnectionBackend:
         self.USERS = loads(self.recieve())
 
 
+def loadSettings():
+    theme = CONFIG.get('settings', 'theme')
+
+    # Todo: add checking beforehand
+    window.loadSettings(CONFIG._sections[theme], CONFIG._sections['settings'])
+
+
 if __name__ == '__main__':
+    chdir(dirname(__file__))
+
     window = WindowBackend()
     connection = ConnectionBackend()
 
-    chdir(dirname(__file__))
     CONFIG = ConfigParser()
     CONFIG.read('config.ini')
+    loadSettings()
 
     if CONFIG.get('data', 'login'):
         Thread(target=connection.standardConnect, daemon=True).start()

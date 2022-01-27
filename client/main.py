@@ -40,6 +40,8 @@ class WindowBackend(QObject):
     setStatus = Signal(str)
     exitCode = Signal(int)
 
+    switchTheme = Signal()
+
     def __init__(self):
         super(WindowBackend, self).__init__()
 
@@ -65,10 +67,25 @@ class WindowBackend(QObject):
         if settings:
             self.engine.rootContext().setContextProperty('settings', settings)
 
+    def _switchThemeTEMP(self):
+        themes = CONFIG.sections()
+        themes.remove('settings')
+        themes.remove('data')
+        current = CONFIG.get('settings', 'theme')
+        index = themes.index(current) + 1
+        if index >= len(themes):
+            index = 0
+        theme = themes[index]
+        CONFIG.set('settings', 'theme', theme)
+        self.loadSettings(
+            CONFIG._sections[theme], CONFIG._sections['settings'])
+
     def _openMain(self):
         self.engine.load(
             join(dirname(__file__), 'qml', 'main.qml'))
         self.root = self.engine.rootObjects()[-1]
+
+        self.switchTheme.connect(self._switchThemeTEMP)
 
     def _openLoading(self):
         self.engine.load(

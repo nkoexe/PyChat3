@@ -5,10 +5,13 @@ Rectangle {
     id: root
 
     property string icon
-    property string iconcolor
+    property string basecolor
+    property string iconcolor: colors.icons
     property string hovercolor
-    property string clickcolor
+    property string clickcolor: colors.highlight
     property int iconmargin: 8
+
+    color: basecolor
 
     function onclick () {}
 
@@ -20,8 +23,9 @@ Rectangle {
             root.color = clickcolor
         }
 
-        onClicked: {
+        onReleased: {
             onclick()
+            root.color = basecolor
         }
 
         Image {

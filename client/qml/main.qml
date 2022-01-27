@@ -52,7 +52,7 @@ Window {
 
             CustomButton {
                 id: titlebarlogo
-                color: colors.titlebar
+                basecolor: colors.titlebar
                 icon: "appicon.png"
                 iconcolor: colors.icons
                 clickcolor: colors.highlight
@@ -67,7 +67,7 @@ Window {
 
             CustomButton {
                 id: closebutton
-                color: colors.titlebar
+                basecolor: colors.titlebar
                 icon: "close.png"
                 iconcolor: colors.icons
                 clickcolor: "#eb4034"
@@ -83,7 +83,7 @@ Window {
 
             CustomButton {
                 id: maximizebutton
-                color: colors.titlebar
+                basecolor: colors.titlebar
                 icon: "square.png"
                 iconcolor: colors.icons
                 clickcolor: "#43bf30"
@@ -102,7 +102,7 @@ Window {
 
             CustomButton {
                 id: hidebutton
-                color: colors.titlebar
+                basecolor: colors.titlebar
                 icon: "hide.png"
                 iconcolor: colors.icons
                 clickcolor: "#e6ad3c"
@@ -203,6 +203,24 @@ Window {
                 anchors.topMargin: settings.margins
                 anchors.left: parent.left
                 anchors.right: parent.right
+
+                CustomButton {
+                    id: themebutton
+                    width: height
+                    radius: width/2
+                    icon: 'reload.png'
+                    basecolor: colors.bg2
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    anchors.topMargin: 4
+                    anchors.bottomMargin: 4
+                    anchors.rightMargin: 10
+
+                    function onclick () {
+                        backend.switchTheme()
+                    }
+                }
             }
 
             Rectangle {
@@ -220,7 +238,7 @@ Window {
 
                 CustomButton {
                     id: sendbutton
-                    color: parent.color
+                    basecolor: parent.color
                     icon: 'send.png'
                     iconcolor: colors.icons
                     clickcolor: colors.highlight
@@ -300,7 +318,7 @@ Window {
 
 /*##^##
 Designer {
-    D{i:0;formeditorZoom:1.25}D{i:1}D{i:4}D{i:5}D{i:6}D{i:7}D{i:8}D{i:9}D{i:3}D{i:11}
-D{i:10}D{i:13}D{i:15}D{i:17}D{i:16}D{i:14}D{i:18}D{i:12}D{i:20}D{i:19}D{i:2}
+    D{i:0;formeditorZoom:1.25}D{i:3}D{i:4}D{i:5}D{i:6}D{i:7}D{i:8}D{i:2}D{i:10}D{i:9}
+D{i:13}D{i:12}D{i:15}D{i:17}D{i:16}D{i:14}D{i:18}D{i:11}D{i:20}D{i:19}D{i:1}
 }
 ##^##*/

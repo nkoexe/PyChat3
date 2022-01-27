@@ -1,6 +1,4 @@
-# PyChat v3
-
-by nico
+# **PyChat v3**, by nico
 
 ## Requisiti funzionali
 

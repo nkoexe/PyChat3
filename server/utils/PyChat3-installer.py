@@ -260,13 +260,13 @@ def connect():
             shortcut = Dispatch('WScript.Shell').CreateShortCut(i)
             shortcut.Targetpath = join(PATH, 'main.py')
             shortcut.WorkingDirectory = PATH
-            shortcut.IconLocation = join(PATH, 'images', 'appicon.ico')
+            shortcut.IconLocation = join(PATH, 'qml', 'images', 'appicon.ico')
             shortcut.save()
     elif sys.platform.startswith('linux'):
         open(join(expanduser('~'), 'Desktop', 'PyChat.desktop'), 'w').write(f'''[Desktop Entry]
-Name=PyChat
-Icon={expanduser('~')}/.PyChat/images/appicon.ico
-Exec=python3 {expanduser('~')}/.PyChat/main.py
+Name=PyChat3
+Icon={join(PATH, 'qml', 'images', 'appicon.ico')}
+Exec={sys.executable} {join(PATH, 'main.py')}
 Terminal=true
 Type=Application''')
         call(['chmod', '+x', join(expanduser('~'), 'Desktop', 'PyChat.desktop')])

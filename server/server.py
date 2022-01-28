@@ -46,15 +46,15 @@ def newuser(imgdata, username, passw, col1, col2):
         if int(u) != userid:
             break
         userid += 1
-        
+
     userid = str(userid)
 
     open(f'images/{userid}.png', 'wb').write(imgdata)
     USERS[userid] = {'name': username,
-                          'hash': passw,
-                          'col1': col1,
-                          'col2': col2,
-                          'customstatus': ''}
+                     'hash': passw,
+                     'col1': col1,
+                     'col2': col2,
+                     'customstatus': ''}
     dump(USERS, open('users.json', 'w'), indent=2, sort_keys=True)
 
     return userid

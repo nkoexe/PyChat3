@@ -2,7 +2,7 @@
 
 ### Client
 
-##### Messaggistica
+#### Messaggistica
 
 - _Descrizione_: L'utente registrato invia e riceve messaggi
 - _Attori_: Utente

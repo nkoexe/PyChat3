@@ -30,17 +30,18 @@ Rectangle {
 
         Image {
             id: image
+            visible: false
             anchors.fill: parent
             anchors.margins: iconmargin
             source: "../images/" + icon
             fillMode: Image.PreserveAspectFit
+        }
 
-            ColorOverlay {
-                source: image
-                color: iconcolor
-                antialiasing: true
-                anchors.fill: image
-            }
+        ColorOverlay {
+            source: image
+            color: iconcolor
+            antialiasing: true
+            anchors.fill: image
         }
     }
 }

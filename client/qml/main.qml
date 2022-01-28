@@ -35,6 +35,11 @@ Window {
     }
 
 
+    onClosing: {
+        backend.close()
+    }
+
+
     Rectangle {
         id: root
         color: colors.bg1
@@ -276,6 +281,8 @@ Window {
                         anchors.leftMargin: 20
                         font.family: settings.font
                         font.pointSize: 16
+
+                        onAccepted: backend.send('msg', text)
                     }
                 }
             }

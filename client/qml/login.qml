@@ -18,6 +18,7 @@ Window {
 
 
     function exitCode (v) {
+        console.log('loading closed')
         if (v === 0) {
             win.close()
         }

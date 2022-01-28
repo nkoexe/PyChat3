@@ -4,7 +4,7 @@
 from base64 import b64encode, b64decode
 from configparser import ConfigParser
 from hashlib import sha256
-from json import loads
+from json import loads, dumps
 from os.path import exists, dirname, join
 from os import chdir, fspath, name as osname
 from pathlib import Path
@@ -15,8 +15,7 @@ from threading import Thread
 
 from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
-from PySide6.QtCore import Signal, Slot, QObject
-from simplejson import dumps
+from PySide6.QtCore import Signal, Slot, QObject, QUrl
 
 
 # encoding num to 4 lett ascii - max 74805200
@@ -92,16 +91,16 @@ class WindowBackend(QObject):
 
     def _openMain(self):
         # Open main application
-        self.engine.load(
-            join(dirname(__file__), 'qml', 'main.qml'))
+        self.engine.load(QUrl.fromLocalFile(
+            join(dirname(__file__), 'qml', 'main.qml')))
         self.root = self.engine.rootObjects()[-1]
 
         self.switchTheme.connect(self._switchThemeTEMP)
 
     def _openLoading(self):
         # Open loading splash screen
-        self.engine.load(
-            join(dirname(__file__), 'qml', 'loading.qml'))
+        self.engine.load(QUrl.fromLocalFile(
+            join(dirname(__file__), 'qml', 'loading.qml')))
         self.root = self.engine.rootObjects()[-1]
 
         self.setStatus.connect(self.root.setLabel)
@@ -109,16 +108,16 @@ class WindowBackend(QObject):
 
     def _openLogin(self):
         # Open login window
-        self.engine.load(
-            join(dirname(__file__), 'qml', 'login.qml'))
+        self.engine.load(QUrl.fromLocalFile(
+            join(dirname(__file__), 'qml', 'login.qml')))
         self.root = self.engine.rootObjects()[-1]
 
         self.exitCode.connect(self.root.exitCode)
 
     def _openSignup(self):
         # Open signup window
-        self.engine.load(
-            join(dirname(__file__), 'qml', 'signup.qml'))
+        self.engine.load(QUrl.fromLocalFile(
+            join(dirname(__file__), 'qml', 'signup.qml')))
         self.root = self.engine.rootObjects()[-1]
 
         self.exitCode.connect(self.root.exitCode)

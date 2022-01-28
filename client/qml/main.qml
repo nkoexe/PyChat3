@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import "components"
+import "widgets"
 
 
 /*
@@ -273,6 +274,7 @@ Window {
                         id: entry
                         focus: true
                         color: colors.text1
+                        selectByMouse: true
                         selectionColor: colors.highlight
                         selectedTextColor: colors.text1
                         verticalAlignment: Text.AlignVCenter
@@ -282,7 +284,10 @@ Window {
                         font.family: settings.font
                         font.pointSize: 16
 
-                        onAccepted: backend.send('msg', text)
+                        onAccepted: {
+                            backend.send('msg', text)
+                            entry.clear()
+                        }
                     }
                 }
             }
@@ -290,9 +295,25 @@ Window {
             ScrollView {
                 id: chatscrollview
                 anchors.top: currentuserbar.bottom
-                anchors.bottom: parent.bottom
+                anchors.bottom: entrybar.top
                 anchors.left: parent.left
                 anchors.right: parent.right
+
+                Rectangle{
+                    id: rectangle
+                    color: "transparent"
+                    anchors.fill: parent
+
+                    /* Message {
+                        height: 70
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        anchors.rightMargin: settings.margins
+                        anchors.leftMargin: settings.margins
+                        anchors.bottomMargin: settings.margins
+                    }*/
+                }
             }
         }
 
@@ -326,6 +347,7 @@ Window {
 /*##^##
 Designer {
     D{i:0;formeditorZoom:1.25}D{i:3}D{i:4}D{i:5}D{i:6}D{i:7}D{i:8}D{i:2}D{i:10}D{i:9}
-D{i:13}D{i:12}D{i:15}D{i:17}D{i:16}D{i:14}D{i:18}D{i:11}D{i:20}D{i:19}D{i:1}
+D{i:13}D{i:12}D{i:15}D{i:17}D{i:16}D{i:14}D{i:20}D{i:19}D{i:18}D{i:11}D{i:22}D{i:21}
+D{i:1}
 }
 ##^##*/

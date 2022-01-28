@@ -78,6 +78,7 @@ def handle_client(cli, cli_id):
             if msg['event']['type'] == 'close':
                 USERS[msg['event']['from']]['online'] = False
                 # Send update to online users
+                break
 
         elif 'update' in msg:
             pass

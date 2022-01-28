@@ -1,3 +1,6 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 from base64 import b64encode, b64decode
 from configparser import ConfigParser
 from hashlib import sha256
@@ -5,6 +8,7 @@ from json import loads
 from os.path import exists, dirname, join
 from os import chdir, fspath, name as osname
 from pathlib import Path
+from time import time
 from requests import get, exceptions
 from socket import socket, timeout
 from threading import Thread
@@ -12,6 +16,7 @@ from threading import Thread
 from PySide6.QtGui import QGuiApplication, QIcon
 from PySide6.QtQml import QQmlApplicationEngine
 from PySide6.QtCore import Signal, Slot, QObject
+from simplejson import dumps
 
 
 # encoding num to 4 lett ascii - max 74805200
@@ -45,15 +50,18 @@ class WindowBackend(QObject):
     def __init__(self):
         super(WindowBackend, self).__init__()
 
+        # Init QT
         self.app = QGuiApplication()
         self.engine = QQmlApplicationEngine()
 
+        # Set app icon
         self.app.setWindowIcon(QIcon(join('qml', 'images', 'appicon.png')))
         if osname == 'nt':
             import ctypes
             ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(
                 u'nicoinc.pychat.3')
 
+        # Connect frontend to backend
         self.engine.rootContext().setContextProperty('backend', self)
 
         self.openMain.connect(self._openMain)
@@ -62,12 +70,14 @@ class WindowBackend(QObject):
         self.openSignup.connect(self._openSignup)
 
     def loadSettings(self, theme=None, settings=None):
+        'Load color theme and settings into frontend'
         if theme:
             self.engine.rootContext().setContextProperty('colors', theme)
         if settings:
             self.engine.rootContext().setContextProperty('settings', settings)
 
     def _switchThemeTEMP(self):
+        'temp funcion, change color scheme'
         themes = CONFIG.sections()
         themes.remove('settings')
         themes.remove('data')
@@ -81,6 +91,7 @@ class WindowBackend(QObject):
             CONFIG._sections[theme], CONFIG._sections['settings'])
 
     def _openMain(self):
+        # Open main application
         self.engine.load(
             join(dirname(__file__), 'qml', 'main.qml'))
         self.root = self.engine.rootObjects()[-1]
@@ -88,6 +99,7 @@ class WindowBackend(QObject):
         self.switchTheme.connect(self._switchThemeTEMP)
 
     def _openLoading(self):
+        # Open loading splash screen
         self.engine.load(
             join(dirname(__file__), 'qml', 'loading.qml'))
         self.root = self.engine.rootObjects()[-1]
@@ -96,33 +108,53 @@ class WindowBackend(QObject):
         self.exitCode.connect(self.root.exitCode)
 
     def _openLogin(self):
+        # Open login window
         self.engine.load(
             join(dirname(__file__), 'qml', 'login.qml'))
         self.root = self.engine.rootObjects()[-1]
 
+        self.exitCode.connect(self.root.exitCode)
+
     def _openSignup(self):
+        # Open signup window
         self.engine.load(
             join(dirname(__file__), 'qml', 'signup.qml'))
         self.root = self.engine.rootObjects()[-1]
 
+        self.exitCode.connect(self.root.exitCode)
+
     def exec(self):
+        # Start the application
         self.app.exec()
+
+    @Slot(str, str)
+    def send(self, msgtype, msg):
+        # Send chat message
+        return connection.sendMessage(msgtype, msg)
+
+    @Slot()
+    def close(self):
+        # Send chat message
+        return connection.close()
 
     @Slot(str, str, result=int)
     def submitLogin(self, username, password):
+        # Submit login info
         return connection.submitLogin(username, sha256(password.encode()).hexdigest())
 
     @Slot(str, str, str, str, str, result=int)
     def submitSignup(self, imgpath, username, password, col1, col2):
+        # Submit signup info
         return connection.submitSignup(imgpath, username, sha256(password.encode()).hexdigest(), col1, col2)
 
 
 class ConnectionBackend:
     def __init__(self):
         self.sock = socket(2, 1)
-        self.connected = False
 
     def send(self, msg):
+        'Encode & send to server bytes or str'
+
         if isinstance(msg, str):
             msg = msg.encode()
         msg = b64encode(msg)
@@ -130,16 +162,30 @@ class ConnectionBackend:
         self.sock.send(msg)
 
     def recieve(self, bytes=False):
+        'Recieve & decode data from server, leave bytes or not'
+
         msg = b64decode(self.sock.recv(aton(self.sock.recv(4).decode())))
         if not bytes:
             msg = msg.decode()
         return msg
 
+    def sendMessage(self, msgtype, msg):
+        'Send chat message to server'
+        msg = {msgtype: {
+            'from': self.MY_ID,
+            't': time(),
+            'content': msg
+        }}
+        self.send(dumps(msg))
+
     def connectServer(self):
+        'Connects to the server & returns code'
+
         self.sock.settimeout(4)
 
         try:
             self.sock.connect(('localhost', 24839))
+            # Recieve latest version code
             self.serverVersion = self.sock.recv(BUF).decode()
             res = 0
         except ConnectionRefusedError:
@@ -154,16 +200,19 @@ class ConnectionBackend:
         return res
 
     def standardConnect(self):
+        'User is logged in, start main application'
+
         window.openLoading.emit()
         code = self.connectServer()
 
+        # Error in connection
         if code != 0:
             return window.exitCode.emit(code)
 
         self.VERSION = CONFIG.get('data', 'version')
         self.MY_ID, MY_HASH = CONFIG.get('data', 'login').split('g')
 
-        # UPDATE
+        # Local and server version do not match, update app
         if self.VERSION != self.serverVersion:
             self.sock.send(b'}}}z')
             window.setStatus.emit('Aggiornando il Software ...')
@@ -179,18 +228,22 @@ class ConnectionBackend:
             print('update: ', system('py main.py'))
 
         else:
+            # Up to date, send login
             self.sock.send(ntoa(int(self.MY_ID)).encode())
             self.send(MY_HASH)
 
+            # Invalid login, open login page
             if self.sock.recv(1) != b'k':
-                return print('login invalid')  # go to login
+                return print('login invalid')
 
             window.exitCode.emit(0)
             window.openMain.emit()
 
+            # Start main reciever loop
             self.mainReciever()
 
     def submitLogin(self, username, password):
+        'Send login information to server'
         code = self.connectServer()
         if code != 0:
             return code
@@ -198,6 +251,7 @@ class ConnectionBackend:
         self.send(username + '×' + password)
         self.MY_ID = self.recieve()
         if self.MY_ID == 'nope':
+            # Login invalid
             self.sock.close()
             self.sock = socket()
             return -1
@@ -207,7 +261,7 @@ class ConnectionBackend:
             # Todo: remove, add to close event
             CONFIG.write(open('config.ini', 'w'))
 
-            window.root.deleteLater()
+            window.exitCode.emit(0)
             window.openMain.emit()
             self.mainReciever()
 
@@ -238,6 +292,12 @@ class ConnectionBackend:
 
     def mainReciever(self):
         self.USERS = loads(self.recieve())
+
+        while True:
+            print(self.recieve())
+
+    def close(self):
+        self.send(dumps({'event': {'from': self.MY_ID, 'type': 'close'}}))
 
 
 def loadSettings():

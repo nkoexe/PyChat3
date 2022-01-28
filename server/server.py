@@ -1,6 +1,9 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 from base64 import b64decode, b64encode
 from copy import deepcopy
-from json import dump, dumps, load
+from json import dump, dumps, load, loads
 from os import chdir, remove
 from os.path import dirname, join
 from shutil import make_archive
@@ -67,6 +70,20 @@ def handle_client(cli, cli_id):
         del USERS_TO_SEND[u]['hash']
 
     send(cli, dumps(USERS_TO_SEND))
+
+    while True:
+        msg = loads(recieve(cli))
+
+        if 'event' in msg:
+            if msg['event']['type'] == 'close':
+                USERS[msg['event']['from']]['online'] = False
+                # Send update to online users
+
+        elif 'update' in msg:
+            pass
+
+        else:
+            print(msg)
 
 
 if __name__ == '__main__':

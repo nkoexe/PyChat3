@@ -17,6 +17,12 @@ Window {
     Material.accent: colors.highlight
 
 
+    function exitCode (v) {
+        if (v === 0) {
+            win.close()
+        }
+    }
+
     Rectangle {
         id: root
         color: colors.bg2

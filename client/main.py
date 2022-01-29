@@ -44,6 +44,7 @@ class WindowBackend(QObject):
     setStatus = Signal(str)
     exitCode = Signal(int)
 
+    addMessage = Signal(str, str, str)
     switchTheme = Signal()
 
     def __init__(self):
@@ -95,6 +96,7 @@ class WindowBackend(QObject):
             join(dirname(__file__), 'qml', 'main.qml')))
         self.root = self.engine.rootObjects()[-1]
 
+        self.addMessage.connect(self.root.createMessage)
         self.switchTheme.connect(self._switchThemeTEMP)
 
     def _openLoading(self):
@@ -133,7 +135,7 @@ class WindowBackend(QObject):
 
     @Slot()
     def close(self):
-        # Send chat message
+        # Close event
         return connection.close()
 
     @Slot(str, str, result=int)
@@ -296,6 +298,7 @@ class ConnectionBackend:
             print(self.recieve())
 
     def close(self):
+        # Todo: write config.ini
         self.send(dumps({'event': {'from': self.MY_ID, 'type': 'close'}}))
 
 

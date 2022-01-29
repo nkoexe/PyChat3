@@ -14,11 +14,10 @@ Window {
 
 
     Material.theme: Material.Dark
-    Material.accent: colors.highlight
+    Material.accent: colors.primary
 
 
     function exitCode (v) {
-        console.log('loading closed')
         if (v === 0) {
             win.close()
         }
@@ -90,7 +89,7 @@ Window {
                         height: parent.height + 5
                         radius: 5
                         border.width: 0
-                        color: closebutton.pressed ? colors.highlight : (closebutton.hovered ? "#09ffffff" : "transparent")
+                        color: closebutton.pressed ? colors.primary : (closebutton.hovered ? "#09ffffff" : "transparent")
                     }
                 }
 

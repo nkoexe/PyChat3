@@ -8,7 +8,7 @@ Rectangle {
     property string basecolor
     property string iconcolor: colors.icons
     property string hovercolor
-    property string clickcolor: colors.highlight
+    property string clickcolor: colors.primary
     property int iconmargin: 8
 
     color: basecolor

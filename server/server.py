@@ -94,11 +94,8 @@ if __name__ == '__main__':
     for u in USERS:
         USERS[u]['online'] = False
 
-    PORT = 24839
-    BUF = 1024
-
     server = socket(2, 1)
-    server.bind(('0.0.0.0', PORT))
+    server.bind(('0.0.0.0', 24839))
     server.listen()
 
     while True:
@@ -116,7 +113,7 @@ if __name__ == '__main__':
         # other: users
 
         if client_id == '74805200':
-            VERSION = client.recv(BUF).decode()
+            VERSION = client.recv(1024).decode()
             print(VERSION)
             # send notification to active users
 
@@ -145,10 +142,11 @@ if __name__ == '__main__':
                     send(client, u)
                     Thread(target=handle_client, args=(
                         client, u), daemon=True).start()
-                    continue
-
-            send(client, 'nope')
-            client.close()
+                    break
+            else:
+                print('login invalid')
+                send(client, 'nope')
+                client.close()
 
         elif client_id == '74805195':
             username = recieve(client)

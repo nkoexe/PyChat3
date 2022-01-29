@@ -16,7 +16,7 @@ Window {
 
 
     Material.theme: Material.Dark
-    Material.accent: colors.highlight
+    Material.accent: colors.primary
 
 
     Rectangle {

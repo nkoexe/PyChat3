@@ -2,9 +2,14 @@ import QtQuick
 
 Rectangle {
     id: root
-    color: colors.bg2
+    height: 70
+    color: colors.bg3
     border.width: 0
     radius: settings.radius
+
+    property string _user
+    property string _time
+    property string _text
 
     Image {
         id: image
@@ -20,8 +25,8 @@ Rectangle {
     Text {
         id: msg
         color: colors.text1
-        text: "Messaggio di prova, figo"
-        font.family: "Product Sans"
+        text: _text
+        font.family: settings.font
         font.pixelSize: 22
         anchors.left: image.right
         anchors.leftMargin: 20
@@ -32,8 +37,8 @@ Rectangle {
     Text {
         id: user
         color: colors.text2
-        text: "Nico"
-        font.family: "Product Sans"
+        text: _user
+        font.family: settings.font
         font.pixelSize: 18
         anchors.topMargin: 5
         anchors.left: msg.left
@@ -43,8 +48,8 @@ Rectangle {
     Text {
         id: time
         color: colors.text2
-        text: "15:54"
-        font.family: "Product Sans"
+        text: _time
+        font.family: settings.font
         font.pixelSize: 12
         anchors.bottomMargin: 2
         anchors.left: user.right
